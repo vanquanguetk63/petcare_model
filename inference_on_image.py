@@ -26,5 +26,3 @@ def read_image(path):
 def inference(img):
     return(label[str(np.argmax(model(img)[0].detach().cpu().numpy()))])
 
-# image = "/home/chientv/Downloads/Rhodesian-Ridgeback-dog.webp"
-# print(inference(read_image(image)))
