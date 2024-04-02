@@ -1,15 +1,24 @@
 from typing import Union
 import os
-from fastapi import FastAPI, UploadFile
+
+import cloudinary
+from fastapi import FastAPI, UploadFile, HTTPException
 import inference_on_image
 from werkzeug.utils import secure_filename
 from pathlib import Path
 from fastapi.responses import JSONResponse
 import datetime
 import shutil
+from cloudinary.uploader import upload
 
 app = FastAPI()
 
+
+cloudinary.config(
+    cloud_name='dzq5s8m4q',
+    api_key='518663548128995',
+    api_secret='yMkOsZCM4gjYUVPY35IWFQPaY3U',
+);
 UPLOAD_FOLDER = './data/images'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
 
@@ -48,6 +57,16 @@ def upload_file(file: UploadFile):
     return {'label': result}
 
 
+@app.post("/upload/")
+async def upload_image(file: UploadFile):
+    try:
+        if file.filename == '':
+            return JSONResponse(status_code=400, content={'description': 'No selected file'})
+
+        response = upload(file.file)
+        return {"url": response['secure_url']}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # uvicorn api:app --host 0.0.0.0 --port 8000
 # curl -X 'POST' 'http://0.0.0.0:8000/predict' -H 'accept: application/json' --form '20230320_103146.jpg"'
